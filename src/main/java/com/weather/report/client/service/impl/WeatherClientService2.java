@@ -8,18 +8,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 @Service
 @Slf4j
 public class WeatherClientService2 implements IWeatherClientService {
-    private static WeatherIndicatorDTO weatherIndicatorDTO = new WeatherIndicatorDTO();
+    private static WeatherIndicatorDTO weatherIndicatorDTO;
 
     @Autowired
     private WeatherRegisterService weatherRegisterService;
 
     @PostConstruct
     private void register() {
+        weatherIndicatorDTO = new WeatherIndicatorDTO();
         weatherRegisterService.registerWeatherClient(this);
+    }
+
+    @PreDestroy
+    private void unRegister() {
+        weatherRegisterService.removeClient(this);
     }
 
     @Override

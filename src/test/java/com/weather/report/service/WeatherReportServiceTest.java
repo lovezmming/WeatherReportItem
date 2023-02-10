@@ -3,10 +3,10 @@ package com.weather.report.service;
 import com.weather.report.client.service.impl.WeatherClientService;
 import com.weather.report.client.service.impl.WeatherClientService2;
 import com.weather.report.common.model.WeatherIndicatorDTO;
-import com.weather.report.server.service.impl.WeatherIndicatorService;
+import com.weather.report.server.service.impl.WeatherReportService;
 import com.weather.report.server.service.impl.WeatherRegisterService;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,36 +20,36 @@ public class WeatherReportServiceTest {
     @Autowired
     private WeatherClientService2 weatherClientService2;
     @Autowired
-    private WeatherIndicatorService weatherIndicatorService;
+    private WeatherReportService weatherReportService;
     @Autowired
     private WeatherRegisterService weatherRegisterService;
 
     @Test
     public void updateWeatherIndicatorTest() {
-        // 注册2个客户端
-        weatherRegisterService.registerWeatherClient(weatherClientService);
-        weatherRegisterService.registerWeatherClient(weatherClientService2);
+        // 服务启动 weatherClientService1与2 默认注册
+        Assert.assertEquals(2, weatherRegisterService.getAllClientServerList().size());
 
         // 更新天气指标
         WeatherIndicatorDTO weatherIndicatorDTO = new WeatherIndicatorDTO();
-        weatherIndicatorDTO.setTemperature(23f);
-        weatherIndicatorDTO.setHumidity(65f);
+        weatherIndicatorDTO.setTemperature(33f);
+        weatherIndicatorDTO.setHumidity(35f);
         weatherIndicatorDTO.setPressure(30.4f);
-        weatherIndicatorService.updateNewWeatherIndicator(weatherIndicatorDTO);
-        WeatherIndicatorDTO weatherIndicator = weatherIndicatorService.getLastWeatherIndicator();
-        Assertions.assertEquals(weatherIndicator.getTemperature(), weatherIndicatorDTO.getTemperature());
-        Assertions.assertEquals(weatherIndicator.getHumidity(), weatherIndicatorDTO.getHumidity());
-        Assertions.assertEquals(weatherIndicator.getPressure(), weatherIndicatorDTO.getPressure());
-
-        // 通知所有客户端
-        weatherRegisterService.notifyAllClient();
+        weatherReportService.updateLatestWeatherIndicator(weatherIndicatorDTO);
 
         // 移除客户端1
         weatherRegisterService.removeClient(weatherClientService);
-        weatherRegisterService.notifyAllClient();
+        Assert.assertEquals(1, weatherRegisterService.getAllClientServerList().size());
+        weatherIndicatorDTO.setTemperature(43f);
+        weatherIndicatorDTO.setHumidity(45f);
+        weatherIndicatorDTO.setPressure(40.4f);
+        weatherReportService.updateLatestWeatherIndicator(weatherIndicatorDTO);
 
         // 移除客户端2后无客户端
         weatherRegisterService.removeClient(weatherClientService2);
-        weatherRegisterService.notifyAllClient();
+        Assert.assertEquals(0, weatherRegisterService.getAllClientServerList().size());
+        weatherIndicatorDTO.setTemperature(53f);
+        weatherIndicatorDTO.setHumidity(55f);
+        weatherIndicatorDTO.setPressure(50.4f);
+        weatherReportService.updateLatestWeatherIndicator(weatherIndicatorDTO);
     }
 }

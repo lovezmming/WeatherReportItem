@@ -1,8 +1,7 @@
 package com.weather.report.server.task;
 
 import com.weather.report.common.model.WeatherIndicatorDTO;
-import com.weather.report.server.service.IWeatherIndicatorService;
-import com.weather.report.server.service.IWeatherRegisterService;
+import com.weather.report.server.service.impl.WeatherReportService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,10 +15,7 @@ public class WeatherReportTask {
     private Random random = new Random();
 
     @Autowired
-    private IWeatherIndicatorService weatherIndicatorService;
-
-    @Autowired
-    private IWeatherRegisterService weatherRegisterService;
+    private WeatherReportService weatherReportService;
 
     @Scheduled(cron = "0 0/1 * * * ?")
     public void weatherReport() {
@@ -28,8 +24,6 @@ public class WeatherReportTask {
         weatherIndicatorDTO.setPressure(random.nextFloat());
         weatherIndicatorDTO.setHumidity(random.nextFloat());
         log.info("WeatherReportTask set Weather Indicator: {}", weatherIndicatorDTO);
-        weatherIndicatorService.updateNewWeatherIndicator(weatherIndicatorDTO);
-        weatherRegisterService.notifyAllClient();
+        weatherReportService.updateLatestWeatherIndicator(weatherIndicatorDTO);
     }
-
 }
